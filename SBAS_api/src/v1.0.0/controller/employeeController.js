@@ -1,16 +1,10 @@
-const { getEmployees, getEmployeeById, getLocations, getDepartments, getRoles, registerEmployee, updateEmployeeRole, deleteEmployee } = require('../repositories/employeeRepository');
+const { getEmployees, getEmployeeById, getLocations, getDepartments, getRoles, registerEmployee, updateEmployeeRole, deleteEmployee, updateEmployee } = require('../repositories/employeeRepository');
 
 const fetchEmployees = async (req, res) => {
+    console.log("Test0");
     try {
-        const filters = {
-            role: req.query.role,
-            department: req.query.department,
-            location: req.query.location,
-            newHires: req.query.new === 'true',
-            limit: parseInt(req.query.limit, 10) || 10
-        };
-
-        const employees = await getEmployees(filters);
+        console.log("Test1");
+        const employees = await getEmployees();
         res.status(200).json({ success: true, data: employees });
     } catch (error) {
         console.error('Failed to fetch employees:', error);
@@ -129,6 +123,23 @@ const deleteEmployeeInfo = async (req, res) => {
     }
 };
 
+const updatedEmployee = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { leaving } = req.body;
+        const updated = await updateEmployee(id, leaving);
+
+        if (!updated) {
+            return res.status(404).json({ success: false, error: 'Employee not found or not updated' });
+        }
+
+        res.status(200).json({ success: true, data: updated });
+    } catch (error) {
+        console.error('Failed to update employee:', error);
+        res.status(500).json({ success: false, error: 'Failed to update employee' });
+    }
+};
+
 module.exports = {
     fetchEmployees,
     fetchNewEmployees,
@@ -138,5 +149,6 @@ module.exports = {
     fetchRoles,
     addEmployee,
     updateRole,
-    deleteEmployeeInfo
+    deleteEmployeeInfo,
+    updatedEmployee
 };

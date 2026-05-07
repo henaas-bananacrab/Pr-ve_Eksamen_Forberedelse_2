@@ -27,6 +27,8 @@ const login = async (req, res) => {
         const { email, password } = req.body;
         const employee = await loginEmployee(email);
 
+        console.log("Employee fetched for login:", employee);
+
         if (!employee) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
@@ -35,6 +37,8 @@ const login = async (req, res) => {
         if (!passwordMatch) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
+
+        
 
         const token = jwt.sign({ id: employee.employee_id, role: employee.role }, SECRET_KEY, { expiresIn: '1h' });
         res.status(200).json({ success: true, token });

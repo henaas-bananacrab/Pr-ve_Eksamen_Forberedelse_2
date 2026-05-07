@@ -19,37 +19,11 @@ JOIN location l ON e.location_id = l.location_id
 JOIN department d ON e.department_id = d.department_id
 JOIN role r ON e.role_id = r.role_id`;
 
-async function getEmployees(filters = {}) {
+async function getEmployees() {
     try {
         let sql = EMPLOYEE_SELECT;
-        const clauses = [];
-        const params = [];
-
-        if (filters.role) {
-            clauses.push('r.role = ?');
-            params.push(filters.role);
-        }
-
-        if (filters.department) {
-            clauses.push('d.department = ?');
-            params.push(filters.department);
-        }
-
-        if (filters.location) {
-            clauses.push('l.location = ?');
-            params.push(filters.location);
-        }
-
-        if (clauses.length > 0) {
-            sql += ` WHERE ${clauses.join(' AND ')}`;
-        }
-
-        if (filters.newHires) {
-            sql += ' ORDER BY e.employee_id DESC LIMIT ?';
-            params.push(filters.limit || 10);
-        }
-
-        const [result] = await db.execute(sql, params);
+        
+        const [result] = await db.execute(sql);
 
         return result;
     } catch (error) {
@@ -208,6 +182,20 @@ async function deleteEmployee(employeeId) {
     }
 }
 
+async function updateEmployee(employeeId, leaving) {
+    try {
+        const [result] = await db.execute(
+            'UPDATE employee SET leaving = ? WHERE employee_id = ?',
+            [leaving, employeeId]
+        );
+
+        return result.affectedRows > 0;
+    } catch (error) {
+        console.error('Error updating employee:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     getEmployees,
     getEmployeeById,
@@ -218,5 +206,6 @@ module.exports = {
     loginEmployee,
     getRoleNameById,
     updateEmployeeRole,
-    deleteEmployee
+    deleteEmployee,
+    updateEmployee
 };
